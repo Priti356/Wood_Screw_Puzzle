@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wood Puzzle Screw - Nuts & Bolts Logic Game</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23d4a84e'/><circle cx='50' cy='50' r='30' fill='%23381e0b'/><path d='M35 50h30M50 35v30' stroke='%23fbe69e' stroke-width='8'/></svg>">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <div class="logo-group">
+                <span class="logo-icon">🪛</span>
+                <div class="logo-text">
+                    <h1>Wood Screw</h1>
+                </div>
+            </div>
+
+            <!-- Server Connection Status Pill -->
+            <div id="serverStatusBadge" class="status-badge offline" title="Full Stack Connection Status">
+                <span class="dot"></span> Checking Server...
+            </div>
+
+            <div class="top-actions">
+                <button class="btn-icon" id="btnLevelSelect" title="Level Select" onclick="Game.openLevelSelect()">📋</button>
+                <button class="btn-icon" id="btnLeaderboard" title="Leaderboard" onclick="Game.openLeaderboard()">🏆</button>
+                <button class="btn-icon" id="btnEditor" title="Custom Level Editor" onclick="openLevelEditorModal()">🛠️</button>
+                <button class="btn-icon" id="btnRestart" title="Restart Level" onclick="Game.restartLevel()">🔄</button>
+                <button class="btn-icon" id="btnSettings" title="Settings" onclick="Game.openSettings()">⚙️</button>
+            </div>
+        </header>
+
+        <!-- Level Info Banner -->
+        <section class="level-banner">
+            <div class="level-meta">
+                <span class="level-badge">LEVEL <span id="currentLevelNum">1</span></span>
+                <span class="level-title" id="levelTitleDisplay">First Twist</span>
+            </div>
+            <div class="game-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Moves</span>
+                    <span class="stat-val"><span id="moveCount">0</span> / <span id="parMoves">2</span></span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Time</span>
+                    <span class="stat-val" id="timerDisplay">00:00</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Canvas Viewport -->
+        <main class="canvas-container" id="canvasContainer">
+            <canvas id="gameCanvas"></canvas>
+        </main>
+
+        <!-- Bottom Booster Controls -->
+        <footer class="bottom-tray">
+            <button class="booster-btn" id="boosterDrill" onclick="Game.activateBooster('extraHole')" title="Drill an extra hole anywhere on the backboard">
+                <span class="booster-icon">🪚</span>
+                <span class="booster-name">Extra Hole</span>
+                <span class="booster-badge" id="extraHoleCount">3</span>
+            </button>
+
+            <button class="booster-btn" id="boosterHammer" onclick="Game.activateBooster('hammer')" title="Smash any blocking wooden plank">
+                <span class="booster-icon">🔨</span>
+                <span class="booster-name">Hammer</span>
+                <span class="booster-badge" id="hammerCount">2</span>
+            </button>
+
+            <button class="booster-btn" id="boosterUndo" onclick="Game.activateBooster('undo')" title="Rewind your last bolt move">
+                <span class="booster-icon">↩️</span>
+                <span class="booster-name">Undo</span>
+                <span class="booster-badge" id="undoCount">5</span>
+            </button>
+        </footer>
+    </div>
+
+    <!-- Victory Modal -->
+    <div class="modal-overlay" id="victoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">🎉 Puzzle Solved!</div>
+            </div>
+            <div class="victory-body">
+                <div class="victory-stars" id="victoryStars">
+                    <!-- Dynamic Stars populated by JS -->
+                </div>
+                <div class="victory-stats-grid">
+                    <div class="v-stat">
+                        <span class="v-stat-label">Moves Used</span>
+                        <span class="v-stat-val" id="victoryMoves">0</span>
+                    </div>
+                    <div class="v-stat">
+                        <span class="v-stat-label">Target Par</span>
+                        <span class="v-stat-val" id="victoryPar">0</span>
+                    </div>
+                    <div class="v-stat">
+                        <span class="v-stat-label">Time</span>
+                        <span class="v-stat-val" id="victoryTime">00:00</span>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-secondary" onclick="Game.restartLevel()">Replay</button>
+                    <button class="btn-primary" onclick="Game.nextLevel()">Next Level ➔</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Level Select Modal -->
+    <div class="modal-overlay" id="levelSelectModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">📋 Select Level</div>
+                <button class="modal-close" onclick="Game.closeModals()">✕</button>
+            </div>
+            <div class="level-grid" id="levelSelectGrid">
+                <!-- Dynamically populated level buttons -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboard Modal -->
+    <div class="modal-overlay" id="leaderboardModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">🏆 Top Puzzlers</div>
+                <button class="modal-close" onclick="Game.closeModals()">✕</button>
+            </div>
+            <div class="leaderboard-list" id="leaderboardList">
+                <!-- Dynamically loaded rows -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">⚙️ Game Settings</div>
+                <button class="modal-close" onclick="Game.closeModals()">✕</button>
+            </div>
+            <div class="settings-group">
+                <div class="setting-row">
+                    <div>
+                        <strong>Sound Effects</strong>
+                        <div style="font-size:11px;color:#94a3b8">Drills, clinks, creaks & clicks</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="chkSound" checked onchange="SoundManager.setSoundEnabled(this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-row">
+                    <div>
+                        <strong>Workshop Ambient Music</strong>
+                        <div style="font-size:11px;color:#94a3b8">Relaxing harmonic ambient chords</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="chkMusic" checked onchange="SoundManager.setMusicEnabled(this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-row" style="margin-top: 10px;">
+                    <div>
+                        <strong style="color:#ef4444">Reset Progress</strong>
+                        <div style="font-size:11px;color:#94a3b8">Restart from Level 1</div>
+                    </div>
+                    <button class="btn-secondary" style="border-color:#ef4444;color:#ef4444" onclick="resetAllProgress()">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Level Editor Modal -->
+    <div class="modal-overlay" id="editorModal">
+        <div class="modal-content" style="max-width:520px;">
+            <div class="modal-header">
+                <div class="modal-title">🛠️ Level Builder & Workshop</div>
+                <button class="modal-close" onclick="Game.closeModals()">✕</button>
+            </div>
+            <div class="editor-controls">
+                <div class="editor-field">
+                    <label>Puzzle Title</label>
+                    <input type="text" id="editorTitle" class="editor-input" value="My Custom Puzzle">
+                </div>
+
+                <div class="editor-field">
+                    <label>Wood Finish</label>
+                    <select id="editorWoodType" class="editor-select" onchange="LevelEditor.setWood(this.value)">
+                        <option value="oak">Natural Oak</option>
+                        <option value="walnut">Deep Walnut</option>
+                        <option value="pine">Golden Pine</option>
+                        <option value="mahogany">Rich Mahogany</option>
+                        <option value="birch">Light Birch</option>
+                        <option value="cherry">Cherry Wood</option>
+                    </select>
+                </div>
+
+                <div class="editor-field">
+                    <label>Plank Shape</label>
+                    <select id="editorPlankShape" class="editor-select" onchange="LevelEditor.setPlankType(this.value)">
+                        <option value="bar">Straight Bar</option>
+                        <option value="circle">Center Hub Disk</option>
+                        <option value="l_shape">L-Corner Bracket</option>
+                        <option value="t_shape">T-Junction Piece</option>
+                    </select>
+                </div>
+
+                <div class="editor-field">
+                    <label>Plank Length: <span id="lenVal">260</span>px</label>
+                    <input type="range" min="140" max="420" value="260" oninput="document.getElementById('lenVal').textContent=this.value;LevelEditor.setPlankLength(+this.value)">
+                </div>
+
+                <div class="editor-field">
+                    <label>Plank Angle: <span id="angVal">0</span>°</label>
+                    <input type="range" min="-90" max="90" value="0" oninput="document.getElementById('angVal').textContent=this.value;LevelEditor.setPlankAngle(+this.value)">
+                </div>
+
+                <div class="editor-field">
+                    <label>Bolt Material</label>
+                    <select id="editorBoltMat" class="editor-select" onchange="LevelEditor.setScrewMat(this.value)">
+                        <option value="brass">Polished Brass</option>
+                        <option value="steel">Tempered Steel</option>
+                        <option value="gold">Royal Gold</option>
+                        <option value="copper">Hammered Copper</option>
+                    </select>
+                </div>
+
+                <div class="editor-toolbar">
+                    <button class="tool-btn active" id="btnToolHole" onclick="setEditorTool('holes')">+ Hole</button>
+                    <button class="tool-btn" id="btnToolPlank" onclick="setEditorTool('planks')">+ Plank</button>
+                    <button class="tool-btn" id="btnToolScrew" onclick="setEditorTool('screws')">Toggle Bolt</button>
+                    <button class="tool-btn" style="color:#ef4444" onclick="LevelEditor.deleteSelected()">Delete</button>
+                </div>
+
+                <div class="modal-actions" style="margin-top:14px;">
+                    <button class="btn-secondary" onclick="saveCustomLevelToServer()">💾 Save to Server</button>
+                    <button class="btn-primary" onclick="testPlayCustomLevel()">▶ Test Play</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/audio.js"></script>
+    <script src="js/textures.js"></script>
+    <script src="js/physics.js"></script>
+    <script src="js/levels.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/editor.js"></script>
+    <script src="js/game.js"></script>
+
+    <script>
+        function openLevelEditorModal() {
+            document.getElementById('editorModal').classList.add('active');
+            LevelEditor.setActive(true);
+        }
+
+        function setEditorTool(tool) {
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+            if (tool === 'holes') document.getElementById('btnToolHole').classList.add('active');
+            if (tool === 'planks') document.getElementById('btnToolPlank').classList.add('active');
+            if (tool === 'screws') document.getElementById('btnToolScrew').classList.add('active');
+            LevelEditor.setMode(tool);
+        }
+
+        async function saveCustomLevelToServer() {
+            const draft = LevelEditor.getDraft();
+            draft.title = document.getElementById('editorTitle').value || 'Custom Craft';
+            await ApiService.saveCustomLevel(draft);
+            alert('Custom level saved successfully to the server!');
+            Game.closeModals();
+        }
+
+        function testPlayCustomLevel() {
+            const draft = LevelEditor.getDraft();
+            draft.title = document.getElementById('editorTitle').value || 'Custom Test';
+            Game.closeModals();
+            LevelEditor.setActive(false);
+            Game.getAllLevels().push(draft);
+            Game.loadLevel(Game.getAllLevels().length - 1);
+        }
+
+        async function resetAllProgress() {
+            if (confirm('Are you sure you want to reset all game progress to Level 1?')) {
+                localStorage.removeItem('wood_puzzle_progress');
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
+
