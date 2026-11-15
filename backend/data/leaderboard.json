@@ -1,0 +1,90 @@
+﻿[
+    {
+        "id":  1,
+        "name":  "MasterCraftsman",
+        "level":  20,
+        "stars":  60,
+        "totalMoves":  142,
+        "date":  "2026-11-01"
+    },
+    {
+        "id":  2,
+        "name":  "TimberPro",
+        "level":  18,
+        "stars":  52,
+        "totalMoves":  168,
+        "date":  "2026-11-02"
+    },
+    {
+        "id":  3,
+        "name":  "ScrewWizard",
+        "level":  15,
+        "stars":  45,
+        "totalMoves":  185,
+        "date":  "2026-11-02"
+    },
+    {
+        "id":  4,
+        "name":  "OakMaster",
+        "level":  12,
+        "stars":  36,
+        "totalMoves":  194,
+        "date":  "2026-11-02"
+    },
+    {
+        "id":  5,
+        "name":  "BoltBreaker",
+        "level":  10,
+        "stars":  30,
+        "totalMoves":  210,
+        "date":  "2026-11-02"
+    },
+    {
+        "name":  "Craftsman",
+        "level":  6,
+        "stars":  18,
+        "totalMoves":  4,
+        "id":  "a9312358",
+        "date":  "2026-11-02"
+    },
+    {
+        "name":  "Craftsman",
+        "level":  5,
+        "stars":  15,
+        "totalMoves":  4,
+        "id":  "21793486",
+        "date":  "2026-11-02"
+    },
+    {
+        "name":  "Craftsman",
+        "level":  4,
+        "stars":  12,
+        "totalMoves":  3,
+        "id":  "dfa4afda",
+        "date":  "2026-11-02"
+    },
+    {
+        "name":  "Craftsman",
+        "level":  3,
+        "stars":  9,
+        "totalMoves":  2,
+        "id":  "3f44840e",
+        "date":  "2026-11-02"
+    },
+    {
+        "name":  "Craftsman",
+        "level":  2,
+        "stars":  6,
+        "totalMoves":  1,
+        "id":  "d72f2665",
+        "date":  "2026-11-02"
+    },
+    {
+        "name":  "Craftsman",
+        "level":  1,
+        "stars":  3,
+        "totalMoves":  0,
+        "id":  "dd822832",
+        "date":  "2026-11-02"
+    }
+]
